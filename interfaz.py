@@ -1,3 +1,6 @@
+# Desarrollado por: Mariana Ramirez Giraldo
+# Ficha ADSO: 3063934
+
 import streamlit as st
 import pdfplumber
 import re
@@ -24,6 +27,8 @@ def reiniciar_todo():
 # --------------------------
 
 st.title("📄 Automatización de Pagos AVAL")
+# Se añade tu identificación en la interfaz
+st.caption("ADSO 3063934 - Mariana Ramirez Giraldo")
 st.write("Sube los PDFs y presiona Ejecutar para generar el reporte.")
 
 def limpiar_monto(texto):
@@ -79,8 +84,12 @@ if st.session_state.datos_listos:
     wb = Workbook()
     ws = wb.active
     
-    # Encabezados
-    ws.merge_cells('A1:B1'); ws['A1'] = "Nombre supervisor"
+    # Encabezados (Se mantienen tus celdas originales y se añade tu info)
+    ws.merge_cells('A1:B1'); ws['A1'] = "Mariana Ramirez Giraldo" # Tu nombre
+    ws['A1'].font = Font(bold=True)
+    
+    ws.merge_cells('C1:D1'); ws['C1'] = "ADSO 3063934" # Tu ficha
+    
     ws.merge_cells('J1:K1'); ws['J1'] = "Número de identificación"
     ws.merge_cells('A2:B2'); ws['A2'] = "Dependencia"
     ws.merge_cells('C2:I2'); ws['C2'] = "Centro de Procesos Industriales y de la Construcción"
@@ -111,5 +120,5 @@ if st.session_state.datos_listos:
         data=output.getvalue(),
         file_name="RESULTADO_AVAL_FEBRERO.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        on_click=reiniciar_todo  # <--- Esto borra los PDFs y reinicia la página
+        on_click=reiniciar_todo 
     )
