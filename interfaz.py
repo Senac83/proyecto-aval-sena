@@ -130,7 +130,7 @@ with st.sidebar:
     st.markdown("### Información")
     st.write(f"**Aprendiz:** Mariana Ramirez G.")
     st.write(f"**Ficha:** 3063934")
-    st.write(f"**Instructor:** Carlos Loaiza R.")
+    st.write(f"**Instructor:** Carlos Andres Loaiza R.")
     st.write("---")
     st.write("Centro de Procesos Industriales")
 
