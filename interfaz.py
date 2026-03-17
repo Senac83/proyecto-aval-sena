@@ -28,43 +28,36 @@ st.set_page_config(
 # --- CSS INTEGRAL ---
 st.markdown(f"""
 <style>
-    /* 1. FONDO GENERAL */
     .stApp {{ background-color: #FFFFFF !important; }}
 
-    /* 2. TEXTO EXTERNO DEL CARGADOR */
     [data-testid="stWidgetLabel"] p {{
         color: #000000 !important;
         font-weight: bold !important;
         font-size: 16px !important;
     }}
 
-    /* 3. AREA DE CARGA (DROPZONE) */
     [data-testid="stFileUploader"] section {{
         background-color: #F0F9EB !important;
         border: 2px dashed #39A900 !important;
         border-radius: 15px !important;
     }}
 
-    /* 4. TEXTOS INTERNOS DEL CUADRO */
     [data-testid="stFileUploader"] section div div span,
     [data-testid="stFileUploader"] section div div small {{
         color: #39A900 !important;
         font-weight: bold !important;
     }}
 
-    /* 5. NOMBRE DEL ARCHIVO CARGADO */
     [data-testid="stFileUploaderFileName"] {{
         color: #1b5e20 !important; 
         font-weight: bold !important;
     }}
 
-    /* 6. TAMAÑO DEL ARCHIVO (KB) */
     [data-testid="stFileUploaderFileData"] small {{
         color: #39A900 !important;
         opacity: 1 !important;
     }}
 
-    /* 7. BOTONES Y SIDEBAR */
     [data-testid="stFileUploader"] button {{
         background-color: #39A900 !important;
         color: white !important;
@@ -86,7 +79,6 @@ st.markdown(f"""
         color: #FFFFFF !important;
     }}
 
-    /* 8. BOTÓN DE CERRAR/ABRIR SIDEBAR (FLECHA) */
     [data-testid="stSidebarCollapsedControl"] svg {{
         fill: #39A900 !important;
         color: #39A900 !important;
@@ -97,7 +89,22 @@ st.markdown(f"""
         color: #39A900  !important;
     }}
 
-    /* Limpieza de cabecera */
+    
+
+    [data-testid="stFileUploader"] button[kind="icon"] {{
+        transform: scale(1.2);
+    }}
+
+    /*  BARRA DE PROGRESO  */
+    [data-testid="stProgress"] > div > div > div > div {{
+        background-color: #39A900 !important;
+    }}
+
+    
+    [data-testid="stProgress"] {{
+        height: 10px !important;
+    }}
+
     header[data-testid="stHeader"] {{ background: transparent !important; }}
     .stDeployButton {{ display:none !important; }}
 </style>
@@ -151,8 +158,12 @@ if uploaded_files and st.session_state.datos_listos is None:
     st.write("##")
     if st.button("⚙️ PROCESAR DOCUMENTOS"):
         base_datos = []
+
+        progress_bar = st.progress(0)
+        total_archivos = len(uploaded_files)
+
         with st.spinner("Analizando información..."):
-            for uploaded_file in uploaded_files:
+            for i, uploaded_file in enumerate(uploaded_files, start=1):
                 with pdfplumber.open(uploaded_file) as pdf:
                     texto = "\n".join([p.extract_text() for p in pdf.pages if p.extract_text()])
                     lineas = texto.split("\n")
@@ -175,10 +186,13 @@ if uploaded_files and st.session_state.datos_listos is None:
                             partes = linea.split("MANIZALES")
                             if len(partes) > 1: datos["ICA"] = limpiar_monto(partes[1])
                     if datos.get("Nombre"): base_datos.append(datos)
+
+                progress_bar.progress(i / total_archivos)
+
         st.session_state.datos_listos = base_datos
         st.rerun()
 
-# Botón de Descarga e Informe de éxito
+# Botón de Descarga
 if st.session_state.datos_listos:
     st.write("---")
     st.success(f"✅ ¡Listo! {len(st.session_state.datos_listos)} archivos procesados.")
@@ -191,10 +205,14 @@ if st.session_state.datos_listos:
     for i, d in enumerate(st.session_state.datos_listos, start=1):
         idx = ws.max_row + 1
         ws.append([i, d.get("Compromiso"), d.get("USO"), d.get("Mes"), d.get("Nombre"), "CC", d.get("ID"), d.get("Bruto"), d.get("ICA"), 0, 0, 0, 0, f"=H{idx}-I{idx}"])
-        # Mantenemos tus colores intactos
-        ws[f'H{idx}'].fill = PatternFill(start_color="FFFF00", fill_type="solid") # Amarillo
-        ws[f'I{idx}'].fill = PatternFill(start_color="00B0F0", fill_type="solid") # Azul
-        ws[f'N{idx}'].fill = PatternFill(start_color="92D050", fill_type="solid") # Verde
+        
+        ws[f'H{idx}'].fill = PatternFill(start_color="FFFF00", fill_type="solid")
+        ws[f'I{idx}'].fill = PatternFill(start_color="00B0F0", fill_type="solid")
+        ws[f'N{idx}'].fill = PatternFill(start_color="92D050", fill_type="solid")
+
+        ws[f'H{idx}'].number_format = '#,##0.00'
+        ws[f'I{idx}'].number_format = '#,##0.00'
+        ws[f'N{idx}'].number_format = '#,##0.00'
     
     wb.save(output)
     st.download_button(
