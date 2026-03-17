@@ -95,7 +95,7 @@ st.markdown(f"""
         transform: scale(1.2);
     }}
 
-    /*  BARRA DE PROGRESO  */
+    /* BARRA DE PROGRESO  */
     [data-testid="stProgress"] > div > div > div > div {{
         background-color: #39A900 !important;
     }}
@@ -210,9 +210,10 @@ if st.session_state.datos_listos:
         ws[f'I{idx}'].fill = PatternFill(start_color="00B0F0", fill_type="solid")
         ws[f'N{idx}'].fill = PatternFill(start_color="92D050", fill_type="solid")
 
-        ws[f'H{idx}'].number_format = '#,##0.00'
-        ws[f'I{idx}'].number_format = '#,##0.00'
-        ws[f'N{idx}'].number_format = '#,##0.00'
+        # Formato sin decimales
+        ws[f'H{idx}'].number_format = '#,##0'
+        ws[f'I{idx}'].number_format = '#,##0'
+        ws[f'N{idx}'].number_format = '#,##0'
     
     wb.save(output)
     st.download_button(
